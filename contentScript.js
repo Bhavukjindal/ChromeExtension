@@ -12,7 +12,7 @@
   };
 
   const addNewBookmarkEventHandler = async () => {
-    const currentTime = youtubePlayer.currentTime;
+    // const currentTime = youtubePlayer.currentTime;
     const newBookmark = {
       time: currentTime,
       desc: "Bookmark at " + getTime(currentTime),
