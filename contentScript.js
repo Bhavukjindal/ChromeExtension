@@ -12,9 +12,9 @@
   let newRow = `<tr>
                   <td class="left bottom" colspan="1">
                     <span class="contest-state-phase"><span>
-                    <button style="font-size:30px" class="boring">&#128542;</button>
-                    <button style="font-size:30px" class="nice">&#128516;</button>
-                    <button style="font-size:30px" class="amazing">&#128525;</button>
+                    <button style="font-size:30px" class="boring" id="boring emoji" title="boring">&#128542;</button>
+                    <button style="font-size:30px" class="nice" id="nice emoji" title="nice">&#128516;</button>
+                    <button style="font-size:30px" class="amazing" id="amazing emoji" title="amazing">&#128525;</button>
                   </td>
                 </tr>`;
 
