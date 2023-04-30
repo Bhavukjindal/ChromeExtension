@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const currentVideo = urlParameters.get("v");
 
-  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+  if (activeTab.url.includes("codeforces.com") && currentVideo) {
     chrome.storage.sync.get([currentVideo], (data) => {
       const currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
 
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     const container = document.getElementsByClassName("container")[0];
 
-    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
+    container.innerHTML = '<div class="title">This is not a codeforces problem page.</div>';
   }
 });
 

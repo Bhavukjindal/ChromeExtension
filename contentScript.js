@@ -1,72 +1,38 @@
-(() => {
-  let youtubeLeftControls, youtubePlayer;
-  let currentVideo = "";
-  let currentVideoBookmarks = [];
+(() => 
+{
+  let accountClassDiv = document.getElementsByClassName("lang-chooser")[0];
+  let checkLogin = accountClassDiv.querySelectorAll('div');
+  let loggedin = false;
+  if (checkLogin.length === 2) {
+    loggedin = false;
+  } else {
+    loggedin = true;
+  }
 
-  const fetchBookmarks = () => {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get([currentVideo], (obj) => {
-        resolve(obj[currentVideo] ? JSON.parse(obj[currentVideo]) : []);
-      });
-    });
-  };
+  let newRow = `<tr>
+                  <td class="left bottom" colspan="1">
+                    <span class="contest-state-phase"><span>
+                    <button style="font-size:30px" class="boring">&#128542;</button>
+                    <button style="font-size:30px" class="nice">&#128516;</button>
+                    <button style="font-size:30px" class="amazing">&#128525;</button>
+                  </td>
+                </tr>`;
 
-  const addNewBookmarkEventHandler = async () => {
-    // const currentTime = youtubePlayer.currentTime;
-    const newBookmark = {
-      time: currentTime,
-      desc: "Bookmark at " + getTime(currentTime),
-    };
+  if (loggedin) {
+    let tableBody = document.getElementsByClassName('rtable')[0].querySelector('tbody');
+    let bottomMostElement = tableBody.querySelectorAll('tr')[tableBody.querySelectorAll('tr').length - 1];
+    let tableData = bottomMostElement.querySelectorAll('td')[0];
+    // remove class bottom from tableData
+    tableData.classList.remove('bottom');
+    // add innerHTML as table row in tableBody
+    tableBody.innerHTML += newRow;
+  }
 
-    currentVideoBookmarks = await fetchBookmarks();
-
-    chrome.storage.sync.set({
-      [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time))
-    });
-  };
-
-  const newVideoLoaded = async () => {
-    const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
-
-    currentVideoBookmarks = await fetchBookmarks();
-
-    if (!bookmarkBtnExists) {
-      const bookmarkBtn = document.createElement("img");
-
-      bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
-      bookmarkBtn.className = "ytp-button " + "bookmark-btn";
-      bookmarkBtn.title = "Click to bookmark current timestamp";
-
-      youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-      youtubePlayer = document.getElementsByClassName('video-stream')[0];
-
-      youtubeLeftControls.appendChild(bookmarkBtn);
-      bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
-    }
-  };
-
-  chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, value, videoId } = obj;
-
-    if (type === "NEW") {
-      currentVideo = videoId;
-      newVideoLoaded();
-    } else if (type === "PLAY") {
-      youtubePlayer.currentTime = value;
-    } else if ( type === "DELETE") {
-      currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time != value);
-      chrome.storage.sync.set({ [currentVideo]: JSON.stringify(currentVideoBookmarks) });
-
-      response(currentVideoBookmarks);
-    }
+  document.querySelector('.boring').addEventListener('click', async () => {
+    // Send a message to the background script to execute the API call
+    const response = await chrome.runtime.sendMessage({ action: 'callApi' });
+    console.log(response);
   });
 
-  newVideoLoaded();
-})();
-
-const getTime = t => {
-  var date = new Date(0);
-  date.setSeconds(t);
-
-  return date.toISOString().substr(11, 8);
-};
+}
+)();
