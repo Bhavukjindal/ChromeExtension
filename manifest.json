@@ -2,8 +2,8 @@
   "name": "My YT Bookmarks",
   "version": "0.1.0",
   "description": "Saving timestamps in YT videos",
-  "permissions": ["storage", "tabs"],
-  "host_permissions": ["http://localhost:3000/*,https://*.codeforces.com/*"],
+  "permissions": ["http://localhost:3000/*","storage", "tabs"],
+  "host_permissions": ["http://localhost:3000/*","https://*.codeforces.com/*"],
   "background": {
     "service_worker": "background.js"
   },

@@ -2,46 +2,24 @@
 
 const endpt = "http://localhost:3000/api/v1/problems";
 
-let postValues = {
-  "problemId" : "1822 Magic Triples",
-  "previousEmoji" : "",
-  "currentEmoji" : "nice"
-}
-
-
-function callTheApi(){
-  fetch(endpt,{
-    method: 'PATCH',
-    headers: {'Content-Type': 'application/json','Accept': 'application/json',},
-    body: JSON.stringify(postValues),
-  })
-  .then(function (response) {
-      responseClone = response.clone(); // 2
-      return response.json();
-  })
-  .then(data=> {
-      console.log(data);
-  })
-  .catch(error => console.log(error));
-}
-
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  if (message.action === 'callApi') {
-    // Execute your API call here
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.message === "callApi") {
     fetch(endpt,{
       method: 'PATCH',
-      headers: {'Content-Type': 'application/json','Accept': 'application/json'},
+      headers: {'Content-Type': 'application/json','Accept': 'application/json',},
       body: JSON.stringify(postValues),
     })
-    .then(function (response) {
-        responseClone = response.clone(); // 2
-        console.log(response.json());
-        return response.json();
-    })
-    .then(data=> {
-        console.log(data);
-        sendResponse(data);
-    })
-    .catch(error => console.log(error));
+      .then(response => response.json())
+      .then(data => {
+        // send response back to content.js
+        sendResponse({ message: "apiResponse", data: data });
+      })
+      .catch(error => {
+        console.error(error);
+        // send error response back to content.js
+        sendResponse({ message: "apiError", error: error });
+      });
+    // return true to indicate that you will send a response asynchronously
+    return true;
   }
 });
