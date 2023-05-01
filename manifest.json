@@ -1,7 +1,7 @@
 {
-  "name": "My YT Bookmarks",
+  "name": "ReactForces",
   "version": "0.1.0",
-  "description": "Saving timestamps in YT videos",
+  "description": "Show ratings of a codeforces problem",
   "permissions": ["http://localhost:3000/*","storage", "tabs"],
   "host_permissions": ["http://localhost:3000/*","https://*.codeforces.com/*"],
   "background": {
@@ -30,7 +30,7 @@
       "24": "assets/ext-icon.png",
       "32": "assets/ext-icon.png"
     },
-    "default_title": "My YT Bookmarks",
+    "default_title": "ReactForces",
     "default_popup": "popup.html"
   },
   "manifest_version": 3
