@@ -29,9 +29,15 @@
   let newRow = `<tr>
                   <td class="left bottom" colspan="1">
                     <span class="contest-state-phase"><span>
-                    <button style="font-size:30px;background-color:aliceblue" class="boring" id="boring emoji" title="boring">&#128542;</button>
-                    <button style="font-size:30px;background-color:aliceblue" class="nice" id="nice emoji" title="nice">&#128516;</button>
-                    <button style="font-size:30px;background-color:aliceblue" class="amazing" id="amazing emoji" title="amazing">&#128525;</button>
+                    <button style="font-size:20px;background-color:aliceblue" class="boring" id="boring emoji" title="boring">
+                      &#128542; <span id="boring-count" style="font-size:20px;">0</span>
+                    </button>
+                    <button style="font-size:20px;background-color:aliceblue" class="nice" id="nice emoji" title="nice">
+                      &#128516; <span id="nice-count" style="font-size:20px;">0</span>
+                    </button>
+                    <button style="font-size:20px;background-color:aliceblue" class="amazing" id="amazing emoji" title="amazing">
+                      &#128525; <span id="amazing-count" style="font-size:20px;">0</span>
+                    </button>
                   </td>
                 </tr>`;
 
@@ -48,9 +54,6 @@
     // console.log(tableDataofReactions);
     emojiButtons = tableDataofReactions.querySelectorAll('button');
   }
-
-
-
 
   function isdigit(str) {
     return /^\d+$/.test(str);
@@ -104,33 +107,43 @@
         console.error(error);
       });
 
-      // fetch(`http://localhost:3000/api/v1/users?problemId=${problemId}`, {
-      //   method: 'GET',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Accept': 'application/json',
-      //   }
-      //   })
-      //   .then(response =>{
-      //     if (!response.ok) {
-      //       throw new Error('Network response was not ok');
-      //     }
-      //     return response.json();
-      //   })
-      //   .then(data => {
-      //     // Process the response data
-      //     console.log(data);
-      //     [boringCount, niceCount, amazingCount] = [data[0], data[1], data[2]];
-      //     console.log("setValues",boringCount, niceCount, amazingCount);
-      //   })
-      //   .catch(error => {
-      //     console.error(error);
-      //   });
+      fetch(`http://localhost:3000/api/v1/problems?problemId=${problemId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+        })
+        .then(response =>{
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Process the response data
+          console.log(data);
+          [boringCount, niceCount, amazingCount] = [data[0], data[1], data[2]];
+          console.log("setValues",boringCount, niceCount, amazingCount);
+          document.getElementById("boring-count").innerText = boringCount;
+          document.getElementById("nice-count").innerText = niceCount;
+          document.getElementById("amazing-count").innerText = amazingCount;
+        })
+        .catch(error => {
+          console.error(error);
+        });
   }
 
   function handleButtonClickEventForProblem(selectedButton,newButton){
     newButton.style["background-color"] = "green";
     selectedButton.style["background-color"] = "aliceblue";
+
+    // reduce count of selectedButton and increase count of newButton also add a little delay before updating
+    setTimeout(function(){
+      selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
+      newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
+    }, 500);
+
     chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : selectedButton.classList[0] , apiFor : "Problem" }, function(response) {
       // Handle the API response or error message
       if (response.message === "apiResponse") {
