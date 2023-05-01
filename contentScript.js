@@ -75,7 +75,12 @@
   console.log(problemName);
 
   let problemId = contestId + "-" + problemName;
-  let userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0].innerText;
+  let userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0]
+  if(userId.href.includes('profile')){
+    userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0].innerText;
+  }else{
+    userId = checkLogin[checkLogin.length-2].querySelectorAll('a')[0].innerText;
+  }
   console.log(userId);
 
   let currentUserData = "";
@@ -98,7 +103,8 @@
         // Process the response data
         currentUserData = data;
         console.log(data);
-        selectedButton = emojiButtons[buttonTypes[data.emoji]];
+        if(data.emoji)
+          selectedButton = emojiButtons[buttonTypes[data.emoji]];
         if(selectedButton){
           selectedButton.style["background-color"] = "green";
         }
@@ -136,15 +142,19 @@
 
   function handleButtonClickEventForProblem(selectedButton,newButton){
     newButton.style["background-color"] = "green";
-    selectedButton.style["background-color"] = "aliceblue";
+    if(selectedButton!="")
+      selectedButton.style["background-color"] = "aliceblue";
 
     // reduce count of selectedButton and increase count of newButton also add a little delay before updating
     setTimeout(function(){
-      selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
+      if(selectedButton!="")
+        selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
       newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
     }, 500);
 
-    chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : selectedButton.classList[0] , apiFor : "Problem" }, function(response) {
+    let prevEmoji = selectedButton==="" ? "" : selectedButton.classList[0];
+
+    chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : prevEmoji , apiFor : "Problem" }, function(response) {
       // Handle the API response or error message
       if (response.message === "apiResponse") {
         console.log("API response:", response.data);
