@@ -1,6 +1,5 @@
 // import { getActiveTabURL } from "./utils.js";
 // if rated once, option to unrate
-// if user not logged in still show the emojis
 (() => 
 {
     // Get the current URL
@@ -22,7 +21,6 @@
   } else {
     loggedin = true;
   }
-
 
   let tableDataofReactions = "";
   let emojiButtons = "";
@@ -84,32 +82,32 @@
   if (window.location.href.includes('codeforces.com') && window.location.href.includes('problem')) {
     // Call the API using fetch()
     if(loggedin)
-    fetch(`http://localhost:3000/api/v1/users?problemId=${problemId}&userId=${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
-      })
-      .then(response =>{
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+      fetch(`http://localhost:3000/api/v1/users?problemId=${problemId}&userId=${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         }
-        return response.json();
-      })
-      .then(data => {
-        // Process the response data
-        currentUserData = data;
-        console.log(data);
-        if(data && data.emoji)
-          selectedButton = emojiButtons[buttonTypes[data.emoji]];
-        if(selectedButton){
-          selectedButton.style["background-color"] = "green";
-        }
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        })
+        .then(response =>{
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Process the response data
+          currentUserData = data;
+          console.log(data);
+          if(data && data.emoji)
+            selectedButton = emojiButtons[buttonTypes[data.emoji]];
+          if(selectedButton){
+            selectedButton.style["background-color"] = "green";
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
 
       fetch(`http://localhost:3000/api/v1/problems?problemId=${problemId}`, {
         method: 'GET',
@@ -161,8 +159,6 @@
           console.error("API error:", response.error);
         }
       });
-    }else{
-      // alert("Please login to rate the question");
     }
   }
 
@@ -180,9 +176,7 @@
       alert("Please login to rate the question");
     }
   }
-  
-if(emojiButtons)
-{  
+
   const boringButton = emojiButtons[0];
   boringButton.addEventListener("click", function() {
     // Send a message to background.js to call the API
@@ -211,6 +205,5 @@ if(emojiButtons)
       selectedButton = amazingButton;
     }
   });
-}
 
 })();
