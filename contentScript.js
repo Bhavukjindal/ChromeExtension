@@ -1,5 +1,6 @@
 // import { getActiveTabURL } from "./utils.js";
-
+// if rated once, option to unrate
+// if user not logged in still show the emojis
 (() => 
 {
     // Get the current URL
@@ -41,19 +42,15 @@
                   </td>
                 </tr>`;
 
-  if (loggedin) {
-    let tableBody = document.getElementsByClassName('rtable')[0].querySelector('tbody');
-    let bottomMostElement = tableBody.querySelectorAll('tr')[tableBody.querySelectorAll('tr').length - 1];
-    let tableData = bottomMostElement.querySelectorAll('td')[0];
-    // remove class bottom from tableData
-    tableData.classList.remove('bottom');
-    // add innerHTML as table row in tableBody
-    tableBody.innerHTML += newRow;
-
-    tableDataofReactions = document.getElementsByClassName('left bottom')[0];
-    // console.log(tableDataofReactions);
-    emojiButtons = tableDataofReactions.querySelectorAll('button');
-  }
+  let tableBody = document.getElementsByClassName('rtable')[0].querySelector('tbody');
+  let bottomMostElement = tableBody.querySelectorAll('tr')[tableBody.querySelectorAll('tr').length - 1];
+  let tableData = bottomMostElement.querySelectorAll('td')[0];
+  // remove class bottom from tableData
+  tableData.classList.remove('bottom');
+  // add innerHTML as table row in tableBody
+  tableBody.innerHTML += newRow;
+  tableDataofReactions = document.getElementsByClassName('left bottom')[0];
+  emojiButtons = tableDataofReactions.querySelectorAll('button');
 
   function isdigit(str) {
     return /^\d+$/.test(str);
@@ -86,6 +83,7 @@
   let currentUserData = "";
   if (window.location.href.includes('codeforces.com') && window.location.href.includes('problem')) {
     // Call the API using fetch()
+    if(loggedin)
     fetch(`http://localhost:3000/api/v1/users?problemId=${problemId}&userId=${userId}`, {
       method: 'GET',
       headers: {
@@ -103,7 +101,7 @@
         // Process the response data
         currentUserData = data;
         console.log(data);
-        if(data.emoji)
+        if(data && data.emoji)
           selectedButton = emojiButtons[buttonTypes[data.emoji]];
         if(selectedButton){
           selectedButton.style["background-color"] = "green";
@@ -141,41 +139,50 @@
   }
 
   function handleButtonClickEventForProblem(selectedButton,newButton){
-    newButton.style["background-color"] = "green";
-    if(selectedButton!="")
-      selectedButton.style["background-color"] = "aliceblue";
-
-    // reduce count of selectedButton and increase count of newButton also add a little delay before updating
-    setTimeout(function(){
+    if(loggedin){
+      newButton.style["background-color"] = "green";
       if(selectedButton!="")
-        selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
-      newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
-    }, 500);
+        selectedButton.style["background-color"] = "aliceblue";
 
-    let prevEmoji = selectedButton==="" ? "" : selectedButton.classList[0];
+      // reduce count of selectedButton and increase count of newButton also add a little delay before updating
+      setTimeout(function(){
+        if(selectedButton!="")
+          selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
+          newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
+      }, 500);
 
-    chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : prevEmoji , apiFor : "Problem" }, function(response) {
-      // Handle the API response or error message
-      if (response.message === "apiResponse") {
-        console.log("API response:", response.data);
-      } else if (response.message === "apiError") {
-        console.error("API error:", response.error);
-      }
-    });
+      let prevEmoji = selectedButton==="" ? "" : selectedButton.classList[0];
+
+      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : prevEmoji , apiFor : "Problem" }, function(response) {
+        // Handle the API response or error message
+        if (response.message === "apiResponse") {
+          console.log("API response:", response.data);
+        } else if (response.message === "apiError") {
+          console.error("API error:", response.error);
+        }
+      });
+    }else{
+      // alert("Please login to rate the question");
+    }
   }
 
   function handleButtonClickEventForUser(selectedButton,newButton){
-    chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], userId : userId , apiFor : "user" }, function(response) {
-      // Handle the API response or error message
-      if (response.message === "apiResponse") {
-        console.log("API response:", response.data);
-      } else if (response.message === "apiError") {
-        console.error("API error:", response.error);
-      }
-    });
+    if(loggedin){
+      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], userId : userId , apiFor : "user" }, function(response) {
+        // Handle the API response or error message
+        if (response.message === "apiResponse") {
+          console.log("API response:", response.data);
+        } else if (response.message === "apiError") {
+          console.error("API error:", response.error);
+        }
+      });
+    }else{
+      alert("Please login to rate the question");
+    }
   }
   
-  
+if(emojiButtons)
+{  
   const boringButton = emojiButtons[0];
   boringButton.addEventListener("click", function() {
     // Send a message to background.js to call the API
@@ -204,6 +211,6 @@
       selectedButton = amazingButton;
     }
   });
-
 }
-)();
+
+})();
