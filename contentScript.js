@@ -5,7 +5,9 @@
     // Get the current URL
     const currentUrl = window.location.href;
     let accountClassDiv = document.getElementsByClassName("lang-chooser")[0];
-    let checkLogin = accountClassDiv.querySelectorAll('div');
+    let checkLogin = "";
+    if(accountClassDiv)
+      checkLogin =  accountClassDiv.querySelectorAll('div');
     let selectedButton = "";
     let [boringCount, niceCount, amazingCount] = [0, 0, 0];
     let buttonTypes = {
@@ -16,7 +18,7 @@
   
   let loggedin = false;
 
-  if (checkLogin.length === 2) {
+  if (checkLogin.length === 2 && checkLogin!="") {
     loggedin = false;
   } else {
     loggedin = true;
@@ -40,6 +42,7 @@
                   </td>
                 </tr>`;
 
+if (window.location.href.includes('/problem/')) {
   let tableBody = document.getElementsByClassName('rtable')[0].querySelector('tbody');
   let bottomMostElement = tableBody.querySelectorAll('tr')[tableBody.querySelectorAll('tr').length - 1];
   let tableData = bottomMostElement.querySelectorAll('td')[0];
@@ -49,6 +52,7 @@
   tableBody.innerHTML += newRow;
   tableDataofReactions = document.getElementsByClassName('left bottom')[0];
   emojiButtons = tableDataofReactions.querySelectorAll('button');
+}
 
   function isdigit(str) {
     return /^\d+$/.test(str);
@@ -66,22 +70,27 @@
     }
   }
 
-  let problemName = document.getElementsByClassName("title")[0].innerText.split('. ')[1];
+  let problemName = document.getElementsByClassName("title")[0]
+  if(problemName)
+    problemName = problemName.innerText.split('. ')[1];
   console.log(problemName);
 
   let problemId = contestId + "-" + problemName;
-  let userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0]
-  if(userId.href.includes('profile')){
-    userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0].innerText;
-  }else{
-    userId = checkLogin[checkLogin.length-2].querySelectorAll('a')[0].innerText;
+  let userId = "";
+  if(checkLogin)userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0]
+  if(userId){
+    if(userId.href.includes('profile')){
+      userId = checkLogin[checkLogin.length-1].querySelectorAll('a')[0].innerText;
+    }else{
+      userId = checkLogin[checkLogin.length-2].querySelectorAll('a')[0].innerText;
+    }
   }
   console.log(userId);
 
   let currentUserData = "";
-  if (window.location.href.includes('codeforces.com') && window.location.href.includes('problem')) {
+  if (window.location.href.includes('codeforces.com') && window.location.href.includes('/problem/')) {
     // Call the API using fetch()
-    if(loggedin)
+    if(loggedin){
       fetch(`http://localhost:3000/api/v1/users?problemId=${problemId}&userId=${userId}`, {
         method: 'GET',
         headers: {
@@ -108,7 +117,7 @@
         .catch(error => {
           console.error(error);
         });
-
+  }
       fetch(`http://localhost:3000/api/v1/problems?problemId=${problemId}`, {
         method: 'GET',
         headers: {
@@ -177,6 +186,8 @@
     }
   }
 
+  if(emojiButtons){
+
   const boringButton = emojiButtons[0];
   boringButton.addEventListener("click", function() {
     // Send a message to background.js to call the API
@@ -185,6 +196,10 @@
       handleButtonClickEventForUser(selectedButton,boringButton)
       selectedButton = boringButton;
     }
+    // else if(loggedin){
+    //   selectedButton = "";
+    //   boringButton.querySelector('span').innerText = parseInt(boringButton.querySelector('span').innerText) - 1;
+    // }
   });
 
   const niceButton = emojiButtons[1];
@@ -193,8 +208,11 @@
       handleButtonClickEventForProblem(selectedButton,niceButton)
       handleButtonClickEventForUser(selectedButton,niceButton)
       selectedButton = niceButton;
-    
     }
+    // else if(loggedin){
+    //   selectedButton = "";
+    //   niceButton.querySelector('span').innerText = parseInt(niceButton.querySelector('span').innerText) - 1;
+    // }
   });
 
   const amazingButton = emojiButtons[2];
@@ -204,6 +222,10 @@
       handleButtonClickEventForUser(selectedButton,amazingButton)
       selectedButton = amazingButton;
     }
+    // else if(loggedin){
+    //   selectedButton = "";
+    //   amazingButton.querySelector('span').innerText = parseInt(amazingButton.querySelector('span').innerText) - 1;
+    // }
   });
-
+}
 })();
