@@ -1,5 +1,4 @@
-// import { getActiveTabURL } from "./utils.js";
-// if rated once, option to unrate
+// if rated once, option to unrate  --> done
 (() => 
 {
     // Get the current URL
@@ -117,50 +116,60 @@ if (window.location.href.includes('/problem/')) {
         .catch(error => {
           console.error(error);
         });
-  }
-      fetch(`http://localhost:3000/api/v1/problems?problemId=${problemId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+    }
+    fetch(`http://localhost:3000/api/v1/problems?problemId=${problemId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+      })
+      .then(response =>{
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-        })
-        .then(response =>{
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Process the response data
-          console.log(data);
-          [boringCount, niceCount, amazingCount] = [data[0], data[1], data[2]];
-          console.log("setValues",boringCount, niceCount, amazingCount);
-          document.getElementById("boring-count").innerText = boringCount;
-          document.getElementById("nice-count").innerText = niceCount;
-          document.getElementById("amazing-count").innerText = amazingCount;
-        })
-        .catch(error => {
-          console.error(error);
-        });
+        return response.json();
+      })
+      .then(data => {
+        // Process the response data
+        console.log(data);
+        [boringCount, niceCount, amazingCount] = [data[0], data[1], data[2]];
+        console.log("setValues",boringCount, niceCount, amazingCount);
+        document.getElementById("boring-count").innerText = boringCount;
+        document.getElementById("nice-count").innerText = niceCount;
+        document.getElementById("amazing-count").innerText = amazingCount;
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   function handleButtonClickEventForProblem(selectedButton,newButton){
     if(loggedin){
-      newButton.style["background-color"] = "green";
-      if(selectedButton!="")
-        selectedButton.style["background-color"] = "aliceblue";
-
-      // reduce count of selectedButton and increase count of newButton also add a little delay before updating
-      setTimeout(function(){
+      if(newButton != ""){
+        newButton.style["background-color"] = "green";
         if(selectedButton!="")
-          selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
-          newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
-      }, 500);
-
+          selectedButton.style["background-color"] = "aliceblue";
+      }
+      else{
+        selectedButton.style["background-color"] = "aliceblue";
+      }
+      
       let prevEmoji = selectedButton==="" ? "" : selectedButton.classList[0];
+      // reduce count of selectedButton and increase count of newButton also add a little delay asynchroneously before updating 
+      setTimeout(function(){
+        if(selectedButton!=""){
+          selectedButton.querySelector('span').innerText = parseInt(selectedButton.querySelector('span').innerText) - 1;
+        }
+        if(newButton != ""){
+          newButton.querySelector('span').innerText = parseInt(newButton.querySelector('span').innerText) + 1;
+        }
+        selectedButton = "";
+      }, 500);
+      
+      let cuurentEmoji = newButton==="" ? "" : newButton.classList[0];
 
-      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], prevEmoji : prevEmoji , apiFor : "Problem" }, function(response) {
+      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: cuurentEmoji, prevEmoji : prevEmoji , apiFor : "Problem" }, function(response) {
         // Handle the API response or error message
         if (response.message === "apiResponse") {
           console.log("API response:", response.data);
@@ -173,7 +182,8 @@ if (window.location.href.includes('/problem/')) {
 
   function handleButtonClickEventForUser(selectedButton,newButton){
     if(loggedin){
-      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: newButton.classList[0], userId : userId , apiFor : "user" }, function(response) {
+      let currentEmoji = newButton==="" ? "" : newButton.classList[0];
+      chrome.runtime.sendMessage({ problemId : problemId,currentEmoji: currentEmoji, userId : userId , apiFor : "user" }, function(response) {
         // Handle the API response or error message
         if (response.message === "apiResponse") {
           console.log("API response:", response.data);
@@ -186,8 +196,7 @@ if (window.location.href.includes('/problem/')) {
     }
   }
 
-  if(emojiButtons){
-
+if(emojiButtons){
   const boringButton = emojiButtons[0];
   boringButton.addEventListener("click", function() {
     // Send a message to background.js to call the API
@@ -196,10 +205,11 @@ if (window.location.href.includes('/problem/')) {
       handleButtonClickEventForUser(selectedButton,boringButton)
       selectedButton = boringButton;
     }
-    // else if(loggedin){
-    //   selectedButton = "";
-    //   boringButton.querySelector('span').innerText = parseInt(boringButton.querySelector('span').innerText) - 1;
-    // }
+    else{
+      handleButtonClickEventForProblem(selectedButton,"");
+      handleButtonClickEventForUser(selectedButton,"");
+      selectedButton = "";
+    }
   });
 
   const niceButton = emojiButtons[1];
@@ -209,10 +219,11 @@ if (window.location.href.includes('/problem/')) {
       handleButtonClickEventForUser(selectedButton,niceButton)
       selectedButton = niceButton;
     }
-    // else if(loggedin){
-    //   selectedButton = "";
-    //   niceButton.querySelector('span').innerText = parseInt(niceButton.querySelector('span').innerText) - 1;
-    // }
+    else{
+      handleButtonClickEventForProblem(selectedButton,"");
+      handleButtonClickEventForUser(selectedButton,"");
+      selectedButton = "";
+    }
   });
 
   const amazingButton = emojiButtons[2];
@@ -222,10 +233,11 @@ if (window.location.href.includes('/problem/')) {
       handleButtonClickEventForUser(selectedButton,amazingButton)
       selectedButton = amazingButton;
     }
-    // else if(loggedin){
-    //   selectedButton = "";
-    //   amazingButton.querySelector('span').innerText = parseInt(amazingButton.querySelector('span').innerText) - 1;
-    // }
+    else{
+      handleButtonClickEventForProblem(selectedButton,"");
+      handleButtonClickEventForUser(selectedButton,"");
+      selectedButton = "";
+    }
   });
 }
 })();
